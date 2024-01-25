@@ -34,7 +34,7 @@ void setup() {
 
   Serial.print("");
   Serial.println("WiFi connected");
-  Serial.print("IP address");
+  Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
   bot.sendMessage(CHAT_ID, "Tunggu dulu...monitoring akan segera dimulai", "");
@@ -44,12 +44,6 @@ void setup() {
   dht.begin();
 }
 
-void setup() {
-  Serial.begin(115200);
-  delay(2000);
-  Serial.print("Workshop Monitoring Tanaman SMKN7 Baleendah\n");
-  dht.begin();
-}
 void loop() {
   sensor_analog = analogRead(sensor_pin);
   M = (100 - ((sensor_analog/4095.00) * 100));
@@ -58,6 +52,7 @@ void loop() {
   Serial.println("Sensor tidak terbaca!");
   if (isnan(h) || isnan(t) || isnan(M)) {
     Serial.println("Sensor tidak terbaca!");
+    bot.sendMessage(CHAT_ID, "Sensor tidak terbaca!", "");
     return;
   }
   Serial.print("========Monitoring Tanaman========\n");
@@ -70,5 +65,19 @@ void loop() {
   Serial.print("Kelembapan air tanah: ");
   Serial.print(M);
   Serial.println(" %");
-  delay(2000);
+  bot.sendMessage(CHAT_ID, "Monitoring Tanaman SMKN7 Baleendah");
+  kirimPesanTelegram(h, t, M);
+}
+
+void kirimPesanTelegram(float h, float t, int M) {
+  String pesan = "Suhu saat ini: " + String(t,2) + "°C\n" + 
+  "Humiditas udara saat ini: " + String(h,2) + "%\n" +
+  "Tingkat kelembapan tanah saat ini: " + String(M) + "%\n";
+
+  if(bot.sendMessage(CHAT_ID,pesan,"Markdown")) {
+    Serial.println("Pesan berhasil dikirim");
+  }else{
+    Serial.println("Gagal mengirim pesan");
+  }
+  delay(1000);
 }
